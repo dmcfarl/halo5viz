@@ -62,8 +62,9 @@ public class RetrieveStats extends HttpServlet {
 		List<JSONObject> events = StatsCall.getMatchEvents(HaloAPIConstants.WARZONE_MODE, mapId,
 				Integer.parseInt(numMatches), players);
 		List<JSONObject> playerEvents = StatsFilter.filterPlayerKills(events, players);
-		String coordinates = StatsFilter.filterVictims(playerEvents, "var points = [%s];", "[%s,%s]", 2, players);
+		String coordinates = StatsFilter.filterVictims(playerEvents, "[%s]", "[%s,%s]", 2, players);
 
+		response.setContentType("application/json");
 		response.getWriter().append(coordinates);
 	}
 
