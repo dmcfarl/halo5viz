@@ -56,18 +56,23 @@ public class RetrieveMultiKills extends HttpServlet {
 		List<JSONObject> events = StatsCall.getMatchEvents(HaloAPIConstants.WARZONE_MODE, mapId,
 				Integer.parseInt(numMatches), players);
 		Map<String, List<List<JSONObject>>> multiKills = StatsFilter.getMultiKills(events, true, players);
-		StringBuffer js = new StringBuffer();
-		for (Map.Entry<String, List<List<JSONObject>>> multiKill : multiKills.entrySet()) {
+		StringBuffer js = new StringBuffer("[");
+		for (int i = 2; i < multiKills.size() + 1; i++) {
+			String multiKillId = String.format(HaloAPIConstants.MULTI_KILL_VAR_FORMAT, i);
+			List<List<JSONObject>> multiKill = multiKills.get(multiKillId);
 			List<JSONObject> kills = new ArrayList<JSONObject>();
-			for (List<JSONObject> sequence : multiKill.getValue()) {
+			for (List<JSONObject> sequence : multiKill) {
 				kills.addAll(sequence);
 			}
-			String coordinates = StatsFilter.filterVictims(kills, "var " + multiKill.getKey() + " = [%s];", "[%s,%s]", 2, HaloAPIConstants.PLAYER);
+			String coordinates = StatsFilter.filterKills(kills, "[%s]", "[%s,%s]", 2, HaloAPIConstants.PLAYER);
 			js.append(coordinates);
-			js.append("\n");
+			js.append(",\n");
 		}
+		js.delete(js.length() - 2, js.length());
+		js.append("]");
 		String coordinates = js.toString();
 
+		response.setContentType("application/json");
 		response.getWriter().append(coordinates);
 	}
 
