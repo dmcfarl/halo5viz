@@ -36,8 +36,10 @@ public class RetrieveStats extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String[] players = request.getParameterValues("player");
+		String mapId = request.getParameter("mapId");
 		String map = request.getParameter("map");
 		String numMatches = request.getParameter("numMatches");
+		
 
 		String playerStr = "";
 		for (int i = 0; i < players.length; i++) {
@@ -45,11 +47,17 @@ public class RetrieveStats extends HttpServlet {
 			playerStr += "\"" + players[i] + "\"\t";
 		}
 		
-		String mapId = MetadataFilter.getMapId(map);
+		if (mapId == null && map != null) {
+			mapId = MetadataFilter.getMapId(map);
+		}
 
 		System.out.println("players = " + playerStr);
-		System.out.println("map = \"" + map + "\" (" + mapId + ")");
+		System.out.println("map = \"" + mapId + "\" (" + map + ")");
 		System.out.println("numMatches = \"" + numMatches + "\"");
+		
+		if (numMatches == null) {
+			numMatches = "1";
+		}
 
 		List<JSONObject> events = StatsCall.getMatchEvents(HaloAPIConstants.WARZONE_MODE, mapId,
 				Integer.parseInt(numMatches), players);
