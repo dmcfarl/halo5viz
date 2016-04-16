@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import com.hobo.bob.util.ReadKey;
 
 public class APICall {
+	private static HttpClient httpclient = HttpClients.createDefault();
 	public static JSONObject callObject(String url) throws URISyntaxException, ClientProtocolException, IOException, JSONException, InterruptedException {
 		return new JSONObject(call(url));
 	}
@@ -30,8 +31,6 @@ public class APICall {
 	public static String call(String url) throws URISyntaxException, ClientProtocolException, IOException, InterruptedException {
 		System.out.println(url);
 		String result = null;
-		// TODO close client
-		HttpClient httpclient = HttpClients.createDefault();
 
 		URIBuilder builder = new URIBuilder(url);
 
@@ -51,6 +50,8 @@ public class APICall {
 		if (result.contains("\"message\": \"Rate limit is exceeded")) {
 			Thread.sleep(5000);
 			result = call(url);
+		} else {
+			Thread.sleep(500);
 		}
 		
 		return result;
