@@ -1,3 +1,8 @@
 /build/
 /key
 /key.txt
+/heatmap.csv
+/heatmap.csv.5
+/killCoordinates.csv
+/killCoordinates.csv.5
+/killCoordinates.csv.old
