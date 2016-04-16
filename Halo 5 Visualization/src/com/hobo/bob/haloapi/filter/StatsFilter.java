@@ -243,18 +243,17 @@ public class StatsFilter {
 			}
 //		}
 
-		String prefix = "multiKill";
-
 		for (Map.Entry<String, List<JSONObject>> killsPerPlayer : sortedEvents.entrySet()) {
 			Stack<JSONObject> multiKills = new Stack<JSONObject>();
 			List<JSONObject> kills = killsPerPlayer.getValue();
 			for (int i = 0; i < kills.size(); i++) {
 				if (!multiKills.isEmpty() && !isMultiKill(multiKills.peek(), kills.get(i))) {
 					if (multiKills.size() > 1) {
-						if (!multiKillResult.containsKey(prefix + multiKills.size())) {
-							multiKillResult.put(prefix + multiKills.size(), new ArrayList<List<JSONObject>>());
+						String multiKillId = String.format(HaloAPIConstants.MULTI_KILL_VAR_FORMAT, multiKills.size());
+						if (!multiKillResult.containsKey(multiKillId)) {
+							multiKillResult.put(multiKillId, new ArrayList<List<JSONObject>>());
 						}
-						multiKillResult.get(prefix + multiKills.size()).add(new ArrayList<JSONObject>(multiKills));
+						multiKillResult.get(multiKillId).add(new ArrayList<JSONObject>(multiKills));
 					}
 
 					while (!multiKills.empty()) {
