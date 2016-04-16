@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import com.hobo.bob.HaloAPIConstants;
 import com.hobo.bob.haloapi.filter.StatsFilter;
+import com.hobo.bob.util.APICallCache;
 
 public class StatsCall extends APICall {
 	public static JSONObject getLastMatch(String player, String mode, String start, String count) {
@@ -30,25 +31,14 @@ public class StatsCall extends APICall {
 	public static JSONObject getMatchEvents(String matchId) {
 		JSONObject result = null;
 		try {
-			result = callObject(
-					"https://www.haloapi.com/stats/" + HaloAPIConstants.TITLE + "/matches/" + matchId + "/events");
+			String call = "https://www.haloapi.com/stats/" + HaloAPIConstants.TITLE + "/matches/" + matchId + "/events";
+			result = (JSONObject) APICallCache.getInstance().getFromCache(call);
+			if (result == null) {
+				result = callObject(call);
+				APICallCache.getInstance().cacheObject(call, result);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-
-		return result;
-	}
-
-	public static JSONArray getMatchesEvents(List<String> matchIds) {
-		JSONArray result = new JSONArray();
-
-		for (String matchId : matchIds) {
-			try {
-				result.put(callObject(
-						"https://www.haloapi.com/stats/" + HaloAPIConstants.TITLE + "/matches/" + matchId + "/events"));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 
 		return result;
