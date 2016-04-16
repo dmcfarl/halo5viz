@@ -1,10 +1,6 @@
 package com.hobo.bob.util;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-
-public class ReadKey {
+public class ReadKey extends ReadFile {
 	private static String key = null;
 	
 	private static ReadKey instance = null;
@@ -24,30 +20,9 @@ public class ReadKey {
 		synchronized (this) {
 			if (key == null) {
 				key = read("key.txt");
-				if (key == null) {
-					key = "bdea5de7e8da4e5f84fc1cdbbf6074ef";
+				if (key != null) {
+					key = key.trim();
 				}
-			}
-		}
-		
-		return key;
-	}
-	
-	private String read(String filename) {
-		String key = null;
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(filename));
-			key = reader.readLine();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
 		
