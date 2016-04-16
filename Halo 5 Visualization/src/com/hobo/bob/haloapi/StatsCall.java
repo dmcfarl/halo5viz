@@ -63,7 +63,6 @@ public class StatsCall extends APICall {
 							playerResult.add(match);
 						}
 					}
-					Thread.sleep(1000);
 					retries++;
 				}
 			} catch (Exception e) {
@@ -100,7 +99,6 @@ public class StatsCall extends APICall {
 								JSONObject match = resultsArray.getJSONObject(i);
 								if (StatsFilter.getMapId(match).equals(mapId)) {
 									System.out.println("Found mapId!");
-									Thread.sleep(500);
 									String matchId = StatsFilter.getMatchId(match);
 									JSONObject events = getMatchEvents(matchId);
 									if (events != null) {
@@ -115,7 +113,6 @@ public class StatsCall extends APICall {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-					Thread.sleep(1000);
 					retries++;
 				}
 
