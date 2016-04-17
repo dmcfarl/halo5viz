@@ -22,10 +22,7 @@ var extent = [-113.25, -90, 86.75, 130];
       var mousePositionControl = new ol.control.MousePosition({
           coordinateFormat: ol.coordinate.createStringXY(4),
           projection: projection,
-          // comment the following two lines to have the mouse position
-          // be placed within the map.
-//          className: 'custom-mouse-position',
-//          target: document.getElementById('mouse-position'),
+          className: 'map-mouse-position',
           undefinedHTML: '&nbsp;'
         });
 
@@ -38,8 +35,6 @@ var extent = [-113.25, -90, 86.75, 130];
         layers: [
           new ol.layer.Image({
             source: new ol.source.ImageStatic({
-              //attributions: '© <a href="http://xkcd.com/license.html">xkcd</a>',
-              //url: 'http://imgs.xkcd.com/comics/online_communities.png',
               url: 'resources/images/maps/Array.png',
               projection: projection,
               imageExtent: extent
@@ -54,3 +49,15 @@ var extent = [-113.25, -90, 86.75, 130];
           maxZoom: 8
         })
       });
+      
+      var exportPNGElement = document.getElementById('export-png');
+
+      if ('download' in exportPNGElement) {
+        exportPNGElement.addEventListener('click', function() {
+          map.once('postcompose', function(event) {
+            var canvas = event.context.canvas;
+            exportPNGElement.href = canvas.toDataURL('image/png');
+          });
+          map.renderSync();
+        }, false);
+      }

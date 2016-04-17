@@ -1,0 +1,33 @@
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+}
+
+#layout {
+	width: 100%;
+	height: 100%;
+}
+
+#map {
+	width: 100%;
+	height: calc(100% - 55px);
+}
+
+#controls {
+	height: 55px;
+	padding: 12px;
+}
+
+.map-mouse-position {
+	top: 8px;
+	right: 35px;
+	position: absolute;
+}
+
+input[type=range] {
+	display: inline-block;
+	width: 10%;
+}

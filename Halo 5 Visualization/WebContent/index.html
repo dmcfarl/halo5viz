@@ -5,18 +5,31 @@
 <title>Insert title here</title>
 <link rel="stylesheet"
 	href="http://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css"
+	type="text/css">
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+	type="text/css">
+<link rel="stylesheet" href="resources/css/com/hobo/bob/layout.css"
+	type="text/css">
 </head>
 <body>
 	<script type="text/javascript"
 		src="http://openlayers.org/en/v3.15.1/build/ol-debug.js"></script>
 
-	<form>
-		<label>radius size</label>
-		<input id="radius" type="range" min="1" max="50" step="1" value="5" />
-		<label>blur size</label>
-		<input id="blur" type="range" min="1" max="50" step="1" value="15" />
-	</form>
-	<div id="map" style="width: 100%; height: 100%; position: fixed">
+	<div id="layout">
+		<div id="map"></div>
+		<div id="controls">
+			<form>
+				<a id="export-png" class="btn btn-default" download="map.png"><i
+					class="fa fa-download"></i> Download PNG</a> <label>radius size</label>
+				<input id="radius" class="control" type="range" min="1" max="50"
+					step="1" value="5" /> <label>blur size</label> <input id="blur"
+					class="control" type="range" min="1" max="50" step="1" value="15" />
+
+			</form>
+		</div>
 	</div>
 	<script type="text/javascript"
 		src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
