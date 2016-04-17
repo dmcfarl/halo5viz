@@ -3,31 +3,42 @@
 <head>
 <meta charset="ISO-8859-1">
 <title>Insert title here</title>
-<link rel="stylesheet" href="http://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">
+<link rel="stylesheet"
+	href="http://openlayers.org/en/v3.15.1/css/ol.css" type="text/css">
 </head>
 <body>
-<script type="text/javascript" src="http://openlayers.org/en/v3.15.1/build/ol-debug.js"></script>
+	<script type="text/javascript"
+		src="http://openlayers.org/en/v3.15.1/build/ol-debug.js"></script>
 
-<div id="map" style="width:100%;height:100%;position:fixed">
-</div>
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
-<script type="text/javascript" src="resources/js/com/hobo/bob/map.js"></script>
-<script type="text/javascript" src="resources/js/com/hobo/bob/pointLayer.js"></script>
-<script type="text/javascript" src="resources/js/com/hobo/bob/multikill.js"></script>
+	<form>
+		<label>radius size</label>
+		<input id="radius" type="range" min="1" max="50" step="1" value="5" />
+		<label>blur size</label>
+		<input id="blur" type="range" min="1" max="50" step="1" value="15" />
+	</form>
+	<div id="map" style="width: 100%; height: 100%; position: fixed">
+	</div>
+	<script type="text/javascript"
+		src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script type="text/javascript" src="resources/js/com/hobo/bob/map.js"></script>
+	<script type="text/javascript"
+		src="resources/js/com/hobo/bob/pointLayer.js"></script>
+	<script type="text/javascript"
+		src="resources/js/com/hobo/bob/multikill.js"></script>
+	<script type="text/javascript"
+		src="resources/js/com/hobo/bob/heatmap.js"></script>
 
-<script type="text/javascript">
-<!-- /Halo_5_Visualization/RetrieveStats -->
-$.getJSON("/Halo_5_Visualization/rest/RetrieveStats/MultiKills",
-    {
-    	player : "Hobo+I3ob", 
-    	map : 'Array',
-    	numMatches : '100'
-    },
-    function(data) {
-    	loadMultiKills(data);
-    }
-);
-</script>
+	<script type="text/javascript">
+	<!-- /Halo_5_Visualization/RetrieveStats -->
+		$.getJSON("/Halo_5_Visualization/rest/RetrieveStats/MultiKills", {
+			player : "Hobo+I3ob",
+			mapName : 'Array',
+			numMatches : '100'
+		}, function(data) {
+			//loadMultiKills(data);
+			loadHeatmap(data);
+		});
+	</script>
 
 </body>
 </html>
