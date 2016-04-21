@@ -86,11 +86,15 @@ function addMultiKillLayer(multiKills, style) {
 		})
 	});
 	
-	var lineStyle = new ol.style.Style({
-		fill: new ol.style.Fill({
+	var killLineStyle = new ol.style.Style({
+		stroke : new ol.style.Stroke({
 			color : 'black',
-			weight : 4
-		}),
+			width : 2,
+			lineDash : [5,5]
+		})
+	});
+	
+	var multikillLineStyle = new ol.style.Style({
 		stroke : new ol.style.Stroke({
 			color : 'black',
 			width : 2
@@ -113,12 +117,12 @@ function addMultiKillLayer(multiKills, style) {
 				featureCount++;
 			}
 			var killLine = new ol.Feature(new ol.geom.LineString(kill));
-			killLine.setStyle(lineStyle);
+			killLine.setStyle(killLineStyle);
 			features[featureCount] = killLine;
 			featureCount++;
 			if (j > 0) {
 				var multiKillLine = new ol.Feature(new ol.geom.LineString([multiKill[j - 1][0], multiKill[j][0]]));
-				multiKillLine.setStyle(lineStyle);
+				multiKillLine.setStyle(multikillLineStyle);
 				features[featureCount] = multiKillLine;
 				featureCount++;
 			}
