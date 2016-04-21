@@ -10,4 +10,6 @@ public class HaloAPIConstants {
 	public static final double MULTI_KILL = 4.5;
 	
 	public static final String MULTI_KILL_VAR_FORMAT = "multiKill%d";
+	
+	public static final int DIMENSIONS = 2;
 }
