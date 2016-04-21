@@ -4,6 +4,19 @@ new ol.style.Style({
 		radius : 5,
 		snapToPixel : false,
 		fill : new ol.style.Fill({
+			color : '#FFFFFF'
+		}),
+		stroke : new ol.style.Stroke({
+			color : '#87CEEB',
+			width : 1
+		})
+	})
+}),
+new ol.style.Style({
+	image : new ol.style.Circle({
+		radius : 5,
+		snapToPixel : false,
+		fill : new ol.style.Fill({
 			color : '#000080'
 		}),
 		stroke : new ol.style.Stroke({
@@ -120,6 +133,6 @@ new ol.style.Style({
 
 function loadMultiKills(data) {
 	for (var idx in data) {
-		addLayer(data[idx], multiKillStyles[idx]);
+		addMultiKillLayer(data[idx], multiKillStyles[idx]);
 	}
 }
