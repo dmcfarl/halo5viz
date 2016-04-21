@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.hobo.bob.HaloAPIConstants;
+import com.hobo.bob.model.KillSet;
 
 public class StatsFilter {
 	public static String getMatchId(JSONObject match) {
@@ -107,15 +108,15 @@ public class StatsFilter {
 	}
 
 	public static List<JSONObject> filterPlayerKills(List<JSONObject> events, String... players) {
-		return filterPlayerEvents(players, true, false, events.toArray(new JSONObject[events.size()]));
+		return filterPlayerEvents(players, true, false, events.toArray(new JSONObject[1]));
 	}
 
 	public static List<JSONObject> filterPlayerDeaths(List<JSONObject> events, String... players) {
-		return filterPlayerEvents(players, false, true, events.toArray(new JSONObject[events.size()]));
+		return filterPlayerEvents(players, false, true, events.toArray(new JSONObject[1]));
 	}
 
 	public static List<JSONObject> filterPlayerEvents(List<JSONObject> events, String... players) {
-		return filterPlayerEvents(players, true, true, events.toArray(new JSONObject[events.size()]));
+		return filterPlayerEvents(players, true, true, events.toArray(new JSONObject[1]));
 	}
 
 	private static List<String> filterAll(List<JSONObject> playerEvents, String[] returnFormat, String coordinateFormat,
@@ -214,47 +215,24 @@ public class StatsFilter {
 		return coordinates;
 	}
 
-	public static Map<String, List<List<JSONObject>>> getMultiKills(List<JSONObject> events, boolean includeAcrossDeaths, String... players) {
+	public static List<List<KillSet>> getMultiKills(List<JSONObject> events, boolean includeAcrossDeaths, String... players) {
 		List<JSONObject> playerEvents = includeAcrossDeaths ? filterPlayerKills(events, players) : filterPlayerEvents(events, players);
 
-		Map<String, List<List<JSONObject>>> multiKillResult = new HashMap<String, List<List<JSONObject>>>();
+		List<List<KillSet>> killResult = new ArrayList<List<KillSet>>();
 
-		Map<String, List<JSONObject>> sortedEvents = new HashMap<String, List<JSONObject>>();
-//		if (players.length == 1) {
-//			sortedKills.put(players[0], playerKills);
-//		} else {
-			for (String player : players) {
-				sortedEvents.put(player, new ArrayList<JSONObject>());
-			}
-
-			for (JSONObject event : playerEvents) {
-				String killer = getKillerGamertag(event);
-				String victim = getVictimGamertag(event);
-				if (killer != null && victim != null) {
-					if (sortedEvents.containsKey(killer) && isEnemyKill(event)) {
-						sortedEvents.get(killer).add(event);
-					}
-					if (sortedEvents.containsKey(victim)) {
-						sortedEvents.get(victim).add(event);
-					}
-				}
-				
-				
-			}
-//		}
+		Map<String, List<JSONObject>> sortedEvents = sortEvents(playerEvents, players);
 
 		for (Map.Entry<String, List<JSONObject>> killsPerPlayer : sortedEvents.entrySet()) {
 			Stack<JSONObject> multiKills = new Stack<JSONObject>();
 			List<JSONObject> kills = killsPerPlayer.getValue();
 			for (int i = 0; i < kills.size(); i++) {
 				if (!multiKills.isEmpty() && !isMultiKill(multiKills.peek(), kills.get(i))) {
-					if (multiKills.size() > 1) {
-						String multiKillId = String.format(HaloAPIConstants.MULTI_KILL_VAR_FORMAT, multiKills.size());
-						if (!multiKillResult.containsKey(multiKillId)) {
-							multiKillResult.put(multiKillId, new ArrayList<List<JSONObject>>());
+					if (killResult.size() < multiKills.size()) {
+						for (int j = killResult.size(); j < multiKills.size(); j++) {
+							killResult.add(new ArrayList<KillSet>());
 						}
-						multiKillResult.get(multiKillId).add(new ArrayList<JSONObject>(multiKills));
 					}
+					killResult.get(multiKills.size() - 1).add(new KillSet(new ArrayList<JSONObject>(multiKills), HaloAPIConstants.DIMENSIONS));
 
 					while (!multiKills.empty()) {
 						multiKills.pop();
@@ -267,7 +245,29 @@ public class StatsFilter {
 			}
 		}
 		
-		return multiKillResult;
+		return killResult;
+	}
+	
+	private static Map<String, List<JSONObject>> sortEvents(List<JSONObject> playerEvents, String... players) {
+		Map<String, List<JSONObject>> sortedEvents = new HashMap<String, List<JSONObject>>();
+		for (String player : players) {
+			sortedEvents.put(player, new ArrayList<JSONObject>());
+		}
+
+		for (JSONObject event : playerEvents) {
+			String killer = getKillerGamertag(event);
+			String victim = getVictimGamertag(event);
+			if (killer != null && victim != null) {
+				if (sortedEvents.containsKey(killer) && isEnemyKill(event)) {
+					sortedEvents.get(killer).add(event);
+				}
+				if (sortedEvents.containsKey(victim)) {
+					sortedEvents.get(victim).add(event);
+				}
+			}
+		}
+		
+		return sortedEvents;
 	}
 
 	private static boolean isMultiKill(JSONObject previousEvent, JSONObject currentEvent) {
@@ -275,10 +275,13 @@ public class StatsFilter {
 		if (killer == null) {
 			killer = "";
 		}
+		
+		Duration current = Duration.parse(currentEvent.getString("TimeSinceStart"));
+		Duration previous = Duration.parse(previousEvent.getString("TimeSinceStart"));
 
-		return killer.equals(getKillerGamertag(currentEvent))
-				&& Duration.parse(currentEvent.getString("TimeSinceStart"))
-						.minus(Duration.parse(previousEvent.getString("TimeSinceStart"))).toMillis()
-						/ 1000.0 < HaloAPIConstants.MULTI_KILL;
+		boolean sameKiller = killer.equals(getKillerGamertag(currentEvent));
+		boolean positiveTime = previous.minus(current).toMillis() <= 0;
+		boolean multiKill = current.minus(previous).toMillis() / 1000.0 < HaloAPIConstants.MULTI_KILL;
+		return sameKiller && positiveTime && multiKill;
 	}
 }
