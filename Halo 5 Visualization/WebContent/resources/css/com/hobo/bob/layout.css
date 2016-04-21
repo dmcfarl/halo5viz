@@ -21,6 +21,10 @@ body {
 	padding: 12px;
 }
 
+.heatmap {
+	display: none
+}
+
 .map-mouse-position {
 	top: 8px;
 	right: 35px;
