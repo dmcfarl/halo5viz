@@ -1,18 +1,85 @@
 var multiKillStyles = {
-	killLineStyle : new ol.style.Style({
-		stroke : new ol.style.Stroke({
-			color : 'black',
-			width : 2,
-			lineDash : [ 5, 5 ]
-		})
-	}),
+	killLineStyleFunction : function(resolution) {
+		var geometry = this.getGeometry();
+		var styles = [
+		// linestring
+		new ol.style.Style({
+			stroke : new ol.style.Stroke({
+				color : 'black',
+				width : 2,
+				lineDash : [ 5, 5 ]
+			})
+		}) ];
 
-	multiKillLineStyle : new ol.style.Style({
-		stroke : new ol.style.Stroke({
-			color : 'black',
-			width : 2
-		})
-	}),
+		var arrowCenter = geometry.getCoordinateAt(0.98);
+
+		geometry.forEachSegment(function(start, end) {
+			var startPixel = map.getPixelFromCoordinate(start);
+			var endPixel = map.getPixelFromCoordinate(end);
+			var distance = [ Math.abs(endPixel[0] - startPixel[0]),
+					Math.abs(endPixel[1] - startPixel[1]) ];
+
+			if (distance[0] > 20 || distance[1] > 20) {
+				var dx = end[0] - start[0];
+				var dy = end[1] - start[1];
+				var rotation = -Math.atan2(dy, dx) + (Math.PI / 2);
+
+				// arrows
+				styles.push(new ol.style.Style({
+					geometry : new ol.geom.Point(end),
+					image : new ol.style.Icon({
+						src : 'resources/images/arrow_sml.png',
+						anchor : [ 0.5, -5 ],
+						anchorYUnits : 'pixels',
+						rotateWithView : true,
+						snapToPixel : false,
+						rotation : rotation
+					})
+				}));
+			}
+		});
+
+		return styles;
+	},
+	multiKillLineStyleFunction : function(resolution) {
+
+		var geometry = this.getGeometry();
+		var styles = [
+		// linestring
+		new ol.style.Style({
+			stroke : new ol.style.Stroke({
+				color : 'black',
+				width : 2
+			})
+		}) ];
+
+		geometry.forEachSegment(function(start, end) {
+			var startPixel = map.getPixelFromCoordinate(start);
+			var endPixel = map.getPixelFromCoordinate(end);
+			var distance = [ Math.abs(endPixel[0] - startPixel[0]),
+					Math.abs(endPixel[1] - startPixel[1]) ];
+
+			if (distance[0] > 25 || distance[1] > 25) {
+				var dx = end[0] - start[0];
+				var dy = end[1] - start[1];
+				var rotation = -Math.atan2(dy, dx) + (Math.PI / 2);
+				// arrows
+				styles.push(new ol.style.Style({
+					geometry : new ol.geom.Point(end),
+					image : new ol.style.Icon({
+						src : 'resources/images/arrow_sml.png',
+						anchor : [ 0.5, -5 ],
+						anchorYUnits : 'pixels',
+						rotateWithView : true,
+						snapToPixel : false,
+						rotation : rotation
+					})
+				}));
+			}
+		});
+
+		return styles;
+	},
 	1 : new ol.style.Style({
 		image : new ol.style.Circle({
 			radius : 5,
@@ -155,7 +222,7 @@ for (var i = 1; i <= 10; i++) {
 }
 
 for ( var layer in multiKillLayers) {
-	for (var type in multiKillLayers[layer]) {
+	for ( var type in multiKillLayers[layer]) {
 		map.addLayer(new ol.layer.Vector({
 			source : multiKillLayers[layer][type]
 		}));
@@ -173,31 +240,33 @@ function addMultiKillLayer(multiKillData) {
 		var points = new Array(0);
 		var killLines = new Array(0);
 		var multiKillLines = new Array(0);
-		
-		for (var multiKillNum  in multiKills) {
+
+		for ( var multiKillNum in multiKills) {
 			var multiKill = multiKills[multiKillNum];
-			for (var killNum in multiKill) {
+			for ( var killNum in multiKill) {
 				var kill = multiKill[killNum];
-				for (var killLoc in kill) {
+				for ( var killLoc in kill) {
 					var loc = new ol.Feature(new ol.geom.Point(kill[killLoc]));
 					loc.setStyle(multiKillStyles[multiKillSize + 1]);
 					points.push(loc);
 				}
-				
+
 				var killLine = new ol.Feature(new ol.geom.LineString(kill));
-				killLine.setStyle(multiKillStyles["killLineStyle"]);
+				killLine.setStyle(multiKillStyles.killLineStyleFunction);
 				killLines.push(killLine);
 				if (killNum > 0) {
 					var multiKillLine = new ol.Feature(new ol.geom.LineString([
 							multiKill[killNum - 1][0], multiKill[killNum][0] ]));
-					multiKillLine.setStyle(multiKillStyles["multiKillLineStyle"]);
+					multiKillLine
+							.setStyle(multiKillStyles.multiKillLineStyleFunction);
 					multiKillLines.push(multiKillLine);
 				}
 			}
 		}
 		multiKillLayers[multiKillSize + 1]["points"].addFeatures(points);
 		multiKillLayers[multiKillSize + 1]["killLines"].addFeatures(killLines);
-		multiKillLayers[multiKillSize + 1]["multiKillLines"].addFeatures(multiKillLines);
+		multiKillLayers[multiKillSize + 1]["multiKillLines"]
+				.addFeatures(multiKillLines);
 	}
 
 }
