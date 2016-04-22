@@ -215,18 +215,39 @@ var multiKillStyles = {
 var multiKillLayers = {};
 for (var i = 1; i <= 10; i++) {
 	multiKillLayers[i] = {
-		killLines : new ol.source.Vector({}),
-		multiKillLines : new ol.source.Vector({}),
-		points : new ol.source.Vector({})
+		sources : {
+			killLines : new ol.source.Vector({}),
+			multiKillLines : new ol.source.Vector({}),
+			points : new ol.source.Vector({})
+		}
 	};
 }
 
 for ( var layer in multiKillLayers) {
-	for ( var type in multiKillLayers[layer]) {
-		map.addLayer(new ol.layer.Vector({
-			source : multiKillLayers[layer][type]
-		}));
+	multiKillLayers[layer].layers = {};
+
+	for ( var type in multiKillLayers[layer].sources) {
+		multiKillLayers[layer].layers[type] = new ol.layer.Vector({
+			source : multiKillLayers[layer].sources[type]
+		});
+		map.addLayer(multiKillLayers[layer].layers[type]);
 	}
+}
+
+var multiKillInput = document.getElementById('multikill');
+if (multiKillInput != null) {
+	multiKillInput.addEventListener('input', function() {
+		for (var i = 1; i < multiKillInput.value; i++) {
+			for ( var type in multiKillLayers[layer].layers) {
+				multiKillLayers[i].layers[type].setVisible(false);
+			}
+		}
+		for (var i = multiKillInput.value; i <= 10; i++) {
+			for ( var type in multiKillLayers[layer].layers) {
+				multiKillLayers[i].layers[type].setVisible(true);
+			}
+		}
+	});
 }
 
 function loadMultiKills(data) {
@@ -263,9 +284,10 @@ function addMultiKillLayer(multiKillData) {
 				}
 			}
 		}
-		multiKillLayers[multiKillSize + 1]["points"].addFeatures(points);
-		multiKillLayers[multiKillSize + 1]["killLines"].addFeatures(killLines);
-		multiKillLayers[multiKillSize + 1]["multiKillLines"]
+		multiKillLayers[multiKillSize + 1].sources.points.addFeatures(points);
+		multiKillLayers[multiKillSize + 1].sources.killLines
+				.addFeatures(killLines);
+		multiKillLayers[multiKillSize + 1].sources.multiKillLines
 				.addFeatures(multiKillLines);
 	}
 
