@@ -70,7 +70,7 @@ public class StatsFilter {
 
 		return location;
 	}
-	
+
 	public static boolean isEnemyKill(JSONObject event) {
 		return event.getInt("DeathDisposition") == 1;
 	}
@@ -215,8 +215,10 @@ public class StatsFilter {
 		return coordinates;
 	}
 
-	public static List<List<KillSet>> getMultiKills(List<JSONObject> events, boolean includeAcrossDeaths, String... players) {
-		List<JSONObject> playerEvents = includeAcrossDeaths ? filterPlayerKills(events, players) : filterPlayerEvents(events, players);
+	public static List<List<KillSet>> getMultiKills(List<JSONObject> events, boolean includeAcrossDeaths,
+			String... players) {
+		List<JSONObject> playerEvents = includeAcrossDeaths ? filterPlayerKills(events, players)
+				: filterPlayerEvents(events, players);
 
 		List<List<KillSet>> killResult = new ArrayList<List<KillSet>>();
 
@@ -227,12 +229,16 @@ public class StatsFilter {
 			List<JSONObject> kills = killsPerPlayer.getValue();
 			for (int i = 0; i < kills.size(); i++) {
 				if (!multiKills.isEmpty() && !isMultiKill(multiKills.peek(), kills.get(i))) {
-					if (killResult.size() < multiKills.size()) {
-						for (int j = killResult.size(); j < multiKills.size(); j++) {
+					// Limit number of arrays to size 10; allow higher
+					// multikills, but group them in the same bucket as the 10's
+					int multiKillSize = multiKills.size() > 10 ? 10 : multiKills.size();
+					if (killResult.size() < multiKillSize) {
+						for (int j = killResult.size(); j < multiKillSize; j++) {
 							killResult.add(new ArrayList<KillSet>());
 						}
 					}
-					killResult.get(multiKills.size() - 1).add(new KillSet(new ArrayList<JSONObject>(multiKills), HaloAPIConstants.DIMENSIONS));
+					killResult.get(multiKillSize - 1)
+							.add(new KillSet(new ArrayList<JSONObject>(multiKills), HaloAPIConstants.DIMENSIONS));
 
 					while (!multiKills.empty()) {
 						multiKills.pop();
@@ -244,10 +250,10 @@ public class StatsFilter {
 				}
 			}
 		}
-		
+
 		return killResult;
 	}
-	
+
 	private static Map<String, List<JSONObject>> sortEvents(List<JSONObject> playerEvents, String... players) {
 		Map<String, List<JSONObject>> sortedEvents = new HashMap<String, List<JSONObject>>();
 		for (String player : players) {
@@ -266,7 +272,7 @@ public class StatsFilter {
 				}
 			}
 		}
-		
+
 		return sortedEvents;
 	}
 
@@ -275,7 +281,7 @@ public class StatsFilter {
 		if (killer == null) {
 			killer = "";
 		}
-		
+
 		Duration current = Duration.parse(currentEvent.getString("TimeSinceStart"));
 		Duration previous = Duration.parse(previousEvent.getString("TimeSinceStart"));
 
