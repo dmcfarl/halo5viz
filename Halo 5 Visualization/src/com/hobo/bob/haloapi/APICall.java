@@ -16,19 +16,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.hobo.bob.HaloAPIConstants;
 import com.hobo.bob.util.ReadKey;
 
 public class APICall {
 	private static HttpClient httpclient = HttpClients.createDefault();
 	public static JSONObject callObject(String url) throws URISyntaxException, ClientProtocolException, IOException, JSONException, InterruptedException {
-		return new JSONObject(call(url));
+		return new JSONObject(call(url, 0));
 	}
 	
 	public static JSONArray callArray(String url) throws URISyntaxException, ClientProtocolException, IOException, JSONException, InterruptedException {
-		return new JSONArray(call(url));
+		return new JSONArray(call(url, 0));
 	}
 	
-	public static String call(String url) throws URISyntaxException, ClientProtocolException, IOException, InterruptedException {
+	public static String call(String url, int retry) throws URISyntaxException, ClientProtocolException, IOException, InterruptedException {
+		if (retry >= HaloAPIConstants.RETRY_LIMIT) {
+			throw new IllegalArgumentException("Retry limit exceeded.");
+		}
 		System.out.println(url);
 		String result = null;
 
@@ -49,7 +53,7 @@ public class APICall {
 		
 		if (result.contains("\"message\": \"Rate limit is exceeded")) {
 			Thread.sleep(5000);
-			result = call(url);
+			result = call(url, retry + 1);
 		} else {
 			Thread.sleep(500);
 		}

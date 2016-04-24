@@ -214,6 +214,11 @@ public class StatsFilter {
 
 		return coordinates;
 	}
+	
+	public static List<List<KillSet>> getMultiKills(JSONObject matchEvents, boolean includeAcrossDeaths,
+			String... players) {
+		return getMultiKills(Arrays.asList(matchEvents), includeAcrossDeaths, players);
+	}
 
 	public static List<List<KillSet>> getMultiKills(List<JSONObject> events, boolean includeAcrossDeaths,
 			String... players) {
