@@ -35,3 +35,7 @@ input[type=range] {
 	display: inline-block;
 	width: 10%;
 }
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}

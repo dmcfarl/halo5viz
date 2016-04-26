@@ -13,6 +13,9 @@
 	type="text/css">
 <link rel="stylesheet" href="resources/css/com/hobo/bob/layout.css"
 	type="text/css">
+<link rel="stylesheet"
+	href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"
+	type="text/css">
 </head>
 <body>
 	<!-- <script type="text/javascript"
@@ -37,8 +40,14 @@
 			</form>
 		</div>
 	</div>
+	<div id="progress" title="Processing...">
+		<div id="progressbar"></div>
+	</div>
+
 	<script type="text/javascript"
 		src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+	<script type="text/javascript"
+		src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 	<script type="text/javascript" src="resources/js/com/hobo/bob/map.js"></script>
 	<script type="text/javascript"
 		src="resources/js/com/hobo/bob/pointLayer.js"></script>
@@ -48,48 +57,59 @@
 		src="resources/js/com/hobo/bob/heatmap.js"></script>
 
 	<script type="text/javascript">
-	<!-- /Halo_5_Visualization/RetrieveStats -->
-		/*$.getJSON("/Halo_5_Visualization/rest/RetrieveStats/MultiKills", {
-			player : "Hobo I3ob",
-			mapName : 'Array',
-			numMatches : '100'
-		}, function(data) {
-			loadMultiKills(data);
-			//loadHeatmap(data);
-		});*/
-		var matchesAdded = 0;
-
-		$.ajax({
-			url : "/Halo_5_Visualization/rest/RetrieveStats/MultiKills",
-			data : {
-				player : "Hobo I3ob",
-				mapName : 'Array',
-				numMatches : '100'
-			},
-			xhrFields : {
-				onprogress : function(e) {
-					if (e.lengthComputable) {
-						console.log(e.loaded / e.total * 100 + '%');
-					}
-					
-					var matches = null;
-					try {
-						matches = $.parseJSON(this.responseText + ']');
-					} catch (e) {
-						matches = $.parseJSON(this.responseText);
-					}
-					
-					for (matchesAdded; matchesAdded < matches.length; matchesAdded++) {
-						loadMultiKills(matches[matchesAdded]);
-					}
-				}
-			},
-			success : function(response) {
-				for (matchesAdded; matchesAdded < response.length; matchesAdded++) {
-					loadMultiKills(matches[matchesAdded]);
-				}
-			}
+		$("#progress").dialog({
+			autoOpen : false,
+			dialogClass : "no-close",
 		});
+		$("#progressbar").progressbar({
+			value : 0
+		});
+
+		var matchesToRetrieve = 100;
+		var matchesAdded = 0;
+		$("#progress").dialog("open");
+		$("#progressbar").progressbar("value", matchesAdded);
+		$("#progressbar").progressbar("option", "max", matchesToRetrieve);
+
+		$
+				.ajax({
+					url : "/Halo_5_Visualization/rest/RetrieveStats/MultiKills",
+					data : {
+						player : "Hobo I3ob",
+						mapName : 'Array',
+						numMatches : matchesToRetrieve
+					},
+					xhrFields : {
+						onprogress : function(e) {
+							if (e.lengthComputable) {
+								console.log(e.loaded / e.total * 100 + '%');
+							}
+
+							var matches = null;
+							try {
+								matches = $.parseJSON(this.responseText + ']');
+							} catch (e) {
+								console.log(e);
+								matches = $.parseJSON(this.responseText);
+							}
+
+							for (matchesAdded; matchesAdded < matches.length; matchesAdded++) {
+								loadMultiKills(matches[matchesAdded]);
+								$("#progressbar").progressbar("value",
+										matchesAdded);
+							}
+						}
+					},
+					success : function(response) {
+						$("#progress").dialog("close");
+						for (matchesAdded; matchesAdded < response.length; matchesAdded++) {
+							loadMultiKills(matches[matchesAdded]);
+						}
+					},
+					error : function() {
+						$("#progress").dialog("close");
+					}
+				});
 	</script>
 
 </body>
