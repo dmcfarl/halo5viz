@@ -37,5 +37,17 @@ input[type=range] {
 }
 
 .no-close .ui-dialog-titlebar-close {
-  display: none;
+	display: none;
+}
+
+.ui-progressbar {
+	position: relative;
+}
+
+.progresslabel {
+	position: absolute;
+	left: 50%;
+	top: 4px;
+	font-weight: bold;
+	text-shadow: 1px 1px 0 #fff;
 }
