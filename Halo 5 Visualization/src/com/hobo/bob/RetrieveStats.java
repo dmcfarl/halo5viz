@@ -14,6 +14,7 @@ import org.glassfish.jersey.server.ChunkedOutput;
 
 import com.hobo.bob.async.MultiKillProcessor;
 import com.hobo.bob.async.RetrieveMatches;
+import com.hobo.bob.haloapi.MetadataCall;
 import com.hobo.bob.haloapi.filter.MetadataFilter;
 /**
  * Restful Web Service implementation class RetrieveStats
@@ -135,6 +136,13 @@ public class RetrieveStats {
 		new Thread(new RetrieveMatches(output, new MultiKillProcessor(), mode, mapId, numMatches, players)).start();
 
 		return output;
+	}
+	
+	@Path("/MapNames")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getMaps() {
+		return MetadataCall.getMaps().toString(4);
 	}
 
 }
