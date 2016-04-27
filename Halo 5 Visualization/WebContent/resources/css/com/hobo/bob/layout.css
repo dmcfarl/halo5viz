@@ -11,12 +11,16 @@ body {
 	height: 100%;
 }
 
-#map {
-	width: 100%;
-	height: calc(100% - 55px);
+#matches {
+	width: 40px;
 }
 
-#controls {
+#map {
+	width: 100%;
+	height: calc(100% - 110px);
+}
+
+.controls {
 	height: 55px;
 	padding: 12px;
 }
@@ -36,6 +40,10 @@ input[type=range] {
 	width: 10%;
 }
 
+select {
+	width: 200px;
+}
+
 .no-close .ui-dialog-titlebar-close {
 	display: none;
 }
@@ -50,4 +58,14 @@ input[type=range] {
 	top: 4px;
 	font-weight: bold;
 	text-shadow: 1px 1px 0 #fff;
+}
+
+#multikilllabel {
+	margin-right: 10px;
+    margin-left: 10px;
+}
+
+#multikill {
+	width: 100px;
+	display: inline-block;
 }

@@ -213,37 +213,47 @@ var multiKillStyles = {
 };
 
 var multiKillLayers = {};
-for (var i = 1; i <= 10; i++) {
-	multiKillLayers[i] = {
-		sources : {
-			killLines : new ol.source.Vector({}),
-			multiKillLines : new ol.source.Vector({}),
-			points : new ol.source.Vector({})
+function initializeMultiKillLayers() {
+	for (var i in multiKillLayers) {
+		if (multiKillLayers[i] && multiKillLayers[i].layers) {
+			for (var layer in multiKillLayers[i].layers) {
+				map.removeLayer(multiKillLayers[i].layers[layer]);
+			}
 		}
-	};
-}
+	}
+	
+	for (var i = 1; i <= 10; i++) {
+		multiKillLayers[i] = {
+			sources : {
+				killLines : new ol.source.Vector({}),
+				multiKillLines : new ol.source.Vector({}),
+				points : new ol.source.Vector({})
+			}
+		};
+	}
 
-for ( var layer in multiKillLayers) {
-	multiKillLayers[layer].layers = {};
+	for ( var layer in multiKillLayers) {
+		multiKillLayers[layer].layers = {};
 
-	for ( var type in multiKillLayers[layer].sources) {
-		multiKillLayers[layer].layers[type] = new ol.layer.Vector({
-			source : multiKillLayers[layer].sources[type]
-		});
-		map.addLayer(multiKillLayers[layer].layers[type]);
+		for ( var type in multiKillLayers[layer].sources) {
+			multiKillLayers[layer].layers[type] = new ol.layer.Vector({
+				source : multiKillLayers[layer].sources[type]
+			});
+			map.addLayer(multiKillLayers[layer].layers[type]);
+		}
 	}
 }
 
-var multiKillInput = document.getElementById('multikill');
+var multiKillInput = $("#multikill");
 if (multiKillInput != null) {
-	multiKillInput.addEventListener('input', function() {
-		for (var i = 1; i < multiKillInput.value; i++) {
-			for ( var type in multiKillLayers[layer].layers) {
+	multiKillInput.on('slidechange', function(event, ui) {
+		for (var i = 1; i < ui.value; i++) {
+			for ( var type in multiKillLayers[i].layers) {
 				multiKillLayers[i].layers[type].setVisible(false);
 			}
 		}
-		for (var i = multiKillInput.value; i <= 10; i++) {
-			for ( var type in multiKillLayers[layer].layers) {
+		for (var i = ui.value; i <= 10; i++) {
+			for ( var type in multiKillLayers[i].layers) {
 				multiKillLayers[i].layers[type].setVisible(true);
 			}
 		}

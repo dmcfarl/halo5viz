@@ -24,8 +24,16 @@
 		src="http://openlayers.org/en/v3.15.1/build/ol.js"></script>
 
 	<div id="layout">
+		<div class="controls">
+			<form>
+				<label>Gamertag:</label> <input id="gamertag" type="text"></input> <label>Map:
+				</label> <select id="mapSelect"></select> <label>Number of matches:
+				</label><input id="matches" type="text"></input> <input id="loadData"
+					type="button" value="Load Matches" onClick="loadMatches()"></input>
+			</form>
+		</div>
 		<div id="map"></div>
-		<div id="controls">
+		<div class="controls">
 			<form>
 				<a id="export-png" class="btn btn-default" download="map.png"><i
 					class="fa fa-download"></i> Download PNG</a>
@@ -35,8 +43,8 @@
 						size</label> <input id="blur" class="control" type="range" min="1"
 						max="50" step="1" value="15" />
 				</div>
-				<label>MultiKills</label> <input id="multikill" class="control"
-					type="range" min="1" max="10" step="1" value="1" />
+				<label id="multikilllabel">MultiKills: </label>
+				<div id="multikill" class="control"></div>
 			</form>
 		</div>
 	</div>
@@ -59,66 +67,122 @@
 		src="resources/js/com/hobo/bob/heatmap.js"></script>
 
 	<script type="text/javascript">
-		$("#progress").dialog({
-			autoOpen : false,
-			dialogClass : "no-close",
-		});
-		$("#progressbar").progressbar({
-			value : 0
-		});
-
-		var matchesToRetrieve = 100;
-		var matchesAdded = 0;
-		$("#progress").dialog("open");
-		$("#progressbar").progressbar("value", matchesAdded);
-		$("#progressbar").progressbar("option", "max", matchesToRetrieve);
-
-		$
-				.ajax({
-					url : "/Halo_5_Visualization/rest/RetrieveStats/MultiKills",
-					data : {
-						player : "Hobo I3ob",
-						mapName : 'Array',
-						numMatches : matchesToRetrieve
-					},
-					xhrFields : {
-						onprogress : function(e) {
-							try {
-								if (e.lengthComputable) {
-									console.log(e.loaded / e.total * 100 + '%');
-								}
-
-								var matches = null;
-								try {
-									matches = $.parseJSON(this.responseText
-											+ ']');
-								} catch (e) {
-									console.log(e);
-									matches = $.parseJSON(this.responseText);
-								}
-
-								for (matchesAdded; matchesAdded < matches.length; matchesAdded++) {
-									loadMultiKills(matches[matchesAdded]);
-									$("#progressbar").progressbar("value",
-											matchesAdded);
-									$(".progresslabel").text(
-											matchesAdded + "%");
-								}
-							} catch (e) {
-								console.warn(e);
-							}
-						}
-					},
-					success : function(response) {
-						$("#progress").dialog("close");
-						for (matchesAdded; matchesAdded < response.length; matchesAdded++) {
-							loadMultiKills(matches[matchesAdded]);
-						}
-					},
-					error : function() {
-						$("#progress").dialog("close");
+		// http://stackoverflow.com/questions/469357/html-text-input-allow-only-numeric-input
+		$(document).ready(function() {
+		    $("#matches").keydown(function (e) {
+		        // Allow: backspace, delete, tab, escape, enter and .
+		        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+		             // Allow: Ctrl+A
+		            (e.keyCode == 65 && e.ctrlKey === true) ||
+		             // Allow: Ctrl+C
+		            (e.keyCode == 67 && e.ctrlKey === true) ||
+		             // Allow: Ctrl+X
+		            (e.keyCode == 88 && e.ctrlKey === true) ||
+		             // Allow: home, end, left, right
+		            (e.keyCode >= 35 && e.keyCode <= 39)) {
+		                 // let it happen, don't do anything
+		                 return;
+		        }
+		        // Ensure that it is a number and stop the keypress
+		        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+		            e.preventDefault();
+		        }
+		    });
+		    
+		    $( "#mapSelect" ).selectmenu();
+			var mapNames = [{name: "Array", id: "cae999f0-f206-11e4-9835-24be05e24f7e"}]; //TODO remove;
+			$.getJSON("/Halo_5_Visualization/rest/RetrieveStats/MapNames", function(data) {
+				// TODO: mapNames = data;
+				$.each(mapNames, function (i, map) {
+					$option = $('<option>', { 
+				        value: map.id,
+				        text : map.name
+				    });
+					if (i == 0) {
+						$option.attr('selected', 'selected');
 					}
+				    $('#mapSelect').append($option);
 				});
+				$("#mapSelect").selectmenu("refresh");
+			});
+			
+			$( "#multikill" ).slider({
+				min: 1,
+				max: 10,
+				value: 1
+			});
+		
+			
+			$("#progress").dialog({
+				autoOpen : false,
+				dialogClass : "no-close",
+			});
+			$("#progressbar").progressbar({
+				value : 0
+			});
+		});
+
+		initializeMultiKillLayers();
+		
+		function loadMatches() {
+			var matchesAdded = 0;
+			$("#progress").dialog("open");
+			$("#progressbar").progressbar("value", matchesAdded);
+			
+			
+			var gamertag = $('#gamertag').val();
+			var mapId = $('#mapSelect').val();
+			var matchesToRetrieve = $('#matches').val();
+			
+			$("#progressbar").progressbar("option", "max", matchesToRetrieve);
+	
+			$
+					.ajax({
+						url : "/Halo_5_Visualization/rest/RetrieveStats/MultiKills",
+						data : {
+							player : gamertag,
+							mapId : mapId,
+							numMatches : matchesToRetrieve
+						},
+						xhrFields : {
+							onprogress : function(e) {
+								try {
+									if (e.lengthComputable) {
+										console.log(e.loaded / e.total * 100 + '%');
+									}
+	
+									var matches = null;
+									try {
+										matches = $.parseJSON(this.responseText
+												+ ']');
+									} catch (e) {
+										console.log(e);
+										matches = $.parseJSON(this.responseText);
+									}
+	
+									for (matchesAdded; matchesAdded < matches.length; matchesAdded++) {
+										loadMultiKills(matches[matchesAdded]);
+										$("#progressbar").progressbar("value",
+												matchesAdded);
+										$(".progresslabel").text(
+												matchesAdded + "%");
+									}
+								} catch (e) {
+									console.warn(e);
+								}
+							}
+						},
+						success : function(response) {
+							$("#progress").dialog("close");
+							for (matchesAdded; matchesAdded < response.length; matchesAdded++) {
+								loadMultiKills(matches[matchesAdded]);
+							}
+						},
+						error : function() {
+							$("#progress").dialog("close");
+						}
+					});
+		}
 	</script>
 
 </body>
